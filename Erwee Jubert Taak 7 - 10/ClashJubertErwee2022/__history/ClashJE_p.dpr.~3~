@@ -1,0 +1,16 @@
+program ClashJE_p;
+
+uses
+  Vcl.Forms,
+  ClashJE_u in 'ClashJE_u.pas' {Form1},
+  dmClashJE_u in 'dmClashJE_u.pas' {dmClashJE: TDataModule};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TdmClashJE, dmClashJE);
+  Application.Run;
+end.

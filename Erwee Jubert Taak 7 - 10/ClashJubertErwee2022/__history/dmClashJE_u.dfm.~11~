@@ -1,0 +1,61 @@
+object dmClashJE: TdmClashJE
+  Height = 430
+  Width = 630
+  PixelsPerInch = 96
+  object conClashJE: TADOConnection
+    Connected = True
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;User ID=Admin;Data Source=D:\Sk' +
+      'ool\IT\2022\Kwartaal 3\PAT Gr 11 Erwee Jubert\Programmering Taak' +
+      ' 7 - 10\ClashJubertErwee2022\Win32\Debug\Clash.mdb;Mode=Share De' +
+      'ny None;Persist Security Info=False;Jet OLEDB:System database=""' +
+      ';Jet OLEDB:Registry Path="";Jet OLEDB:Database Password="";Jet O' +
+      'LEDB:Engine Type=5;Jet OLEDB:Database Locking Mode=1;Jet OLEDB:G' +
+      'lobal Partial Bulk Ops=2;Jet OLEDB:Global Bulk Transactions=1;Je' +
+      't OLEDB:New Database Password="";Jet OLEDB:Create System Databas' +
+      'e=False;Jet OLEDB:Encrypt Database=False;Jet OLEDB:Don'#39't Copy Lo' +
+      'cale on Compact=False;Jet OLEDB:Compact Without Replica Repair=F' +
+      'alse;Jet OLEDB:SFP=False'
+    LoginPrompt = False
+    Mode = cmShareDenyNone
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 288
+    Top = 64
+  end
+  object tblCompetitors: TADOTable
+    Active = True
+    Connection = conClashJE
+    CursorType = ctStatic
+    TableName = 'tblCompetitors'
+    Left = 152
+    Top = 136
+  end
+  object tblAtempts: TADOTable
+    Active = True
+    Connection = conClashJE
+    CursorType = ctStatic
+    TableName = 'tblAtempts'
+    Left = 288
+    Top = 136
+  end
+  object ADOQuery1: TADOQuery
+    Connection = conClashJE
+    Parameters = <>
+    Left = 408
+    Top = 136
+  end
+  object dsrCompetitors: TDataSource
+    DataSet = tblCompetitors
+    Left = 152
+    Top = 232
+  end
+  object dsrAtempts: TDataSource
+    DataSet = tblAtempts
+    Left = 288
+    Top = 232
+  end
+  object dsrClashJE: TDataSource
+    Left = 408
+    Top = 232
+  end
+end

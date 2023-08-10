@@ -1,0 +1,1246 @@
+unit ClashJE_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.ComCtrls, jpeg, dmClashJE_u, Vcl.StdCtrls, Vcl.Samples.Spin, Vcl.Mask,
+  Vcl.ExtCtrls;
+
+type
+  TfrmClashJE = class(TForm)
+    pcPages: TPageControl;
+    tbsWelcome: TTabSheet;
+    tbsCompetitors: TTabSheet;
+    btnAdd: TButton;
+    btnDelete: TButton;
+    btnUpdate: TButton;
+    dbgCompetitors: TDBGrid;
+    sedLevel: TSpinEdit;
+    Label1: TLabel;
+    Level: TLabel;
+    Panel1: TPanel;
+    Label5: TLabel;
+    Panel2: TPanel;
+    cmbSoloQRank: TComboBox;
+    cmbGender: TComboBox;
+    edtGamer_ID: TEdit;
+    edtUsername: TEdit;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label6: TLabel;
+    tbsAttempts: TTabSheet;
+    imgWelcome: TImage;
+    Label7: TLabel;
+    imgCompetitors: TImage;
+    Shape1: TShape;
+    Label10: TLabel;
+    edtSignUpUsername: TEdit;
+    edtSignUpPassword: TEdit;
+    Panel3: TPanel;
+    pnlSignUp: TPanel;
+    Label12: TLabel;
+    btnSkip: TButton;
+    tbsSignIn: TTabSheet;
+    SignUp: TPanel;
+    Label8: TLabel;
+    Label9: TLabel;
+    Label11: TLabel;
+    btnSkipToSignIn: TButton;
+    btnHelp: TButton;
+    imgSignIn: TImage;
+    pnlSignIn: TPanel;
+    Label13: TLabel;
+    Label14: TLabel;
+    edtSignInUsername: TEdit;
+    edtSignInPassword: TEdit;
+    btnSignIn: TButton;
+    Panel4: TPanel;
+    Label15: TLabel;
+    Label16: TLabel;
+    Label17: TLabel;
+    btnBackWelcome: TButton;
+    Shape2: TShape;
+    Label18: TLabel;
+    Label19: TLabel;
+    rgpSort: TRadioGroup;
+    Image1: TImage;
+    dbgAtempts: TDBGrid;
+    Panel5: TPanel;
+    Label20: TLabel;
+    Label22: TLabel;
+    Label23: TLabel;
+    Label24: TLabel;
+    Label25: TLabel;
+    edtAttemptsGamer_ID: TEdit;
+    sedGamesWon: TSpinEdit;
+    sedTotalKills: TSpinEdit;
+    sedTotalGames: TSpinEdit;
+    Panel6: TPanel;
+    Label21: TLabel;
+    Label26: TLabel;
+    rgpAttemptsSort: TRadioGroup;
+    cmbSearchMethod: TComboBox;
+    Panel7: TPanel;
+    Label27: TLabel;
+    btnAttemtps: TButton;
+    Panel8: TPanel;
+    Label28: TLabel;
+    btnBackCompetitors: TButton;
+    btnAttemptsUpdate: TButton;
+    cmbAttemptsSearch: TComboBox;
+    Panel9: TPanel;
+    Label29: TLabel;
+    btnResults: TButton;
+    Panel10: TPanel;
+    Label30: TLabel;
+    btnBackSignIn: TButton;
+    tbsResults: TTabSheet;
+    Image2: TImage;
+    redResults: TRichEdit;
+    Panel11: TPanel;
+    Label31: TLabel;
+    btnCloseProgram: TButton;
+    Label32: TLabel;
+    procedure FormActivate(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
+    procedure btnSkipClick(Sender: TObject);
+    procedure tbsSignInShow(Sender: TObject);
+    procedure btnSkipToSignInClick(Sender: TObject);
+    procedure btnBackWelcomeClick(Sender: TObject);
+    procedure btnSignInClick(Sender: TObject);
+    procedure dbgCompetitorsCellClick(Column: TColumn);
+    procedure btnAddClick(Sender: TObject);
+    procedure btnDeleteClick(Sender: TObject);
+    procedure btnUpdateClick(Sender: TObject);
+    procedure cmbSearchMethodChange(Sender: TObject);
+    procedure rgpSortClick(Sender: TObject);
+    procedure rgpAttemptsSortClick(Sender: TObject);
+    procedure cmbAttemptsSearchChange(Sender: TObject);
+    procedure dbgAtemptsCellClick(Column: TColumn);
+    procedure btnAttemtpsClick(Sender: TObject);
+    procedure btnBackCompetitorsClick(Sender: TObject);
+    procedure btnAttemptsUpdateClick(Sender: TObject);
+    procedure btnBackSignInClick(Sender: TObject);
+    procedure btnResultsClick(Sender: TObject);
+    procedure btnCloseProgramClick(Sender: TObject);
+
+  private
+    { Private declarations }
+  public
+
+    // TextFile
+    btnCloseHelp: TButton;
+    redHelp: TRichEdit;
+    iNumOfEl: integer;
+    arrUsernames, arrPasswords: array [1 .. 100] of string;
+
+    // dbGrid
+    sGamer_Id, sUsername, sGender, sSoloQRank: string;
+    iLevel: integer;
+
+    Procedure CloseHelp(Sender: TObject);
+
+    { Public declarations }
+  end;
+
+var
+  frmClashJE: TfrmClashJE;
+
+implementation
+
+{$R *.dfm}
+// START
+
+procedure TfrmClashJE.FormActivate(Sender: TObject);
+var
+  sLyn: string;
+  ipos: integer;
+  Information: textfile;
+begin
+  tbsWelcome.Enabled := True;
+  pcPages.Pages[0].TabVisible := True;
+  tbsSignIn.Enabled := False;
+  pcPages.Pages[1].TabVisible := False;
+  tbsCompetitors.Enabled := False;
+  pcPages.Pages[2].TabVisible := False;
+  tbsAttempts.Enabled := False;
+  pcPages.Pages[3].TabVisible := False;
+  tbsResults.Enabled := False;
+  pcPages.Pages[4].TabVisible := False;
+
+  with dmClashJE do
+  begin
+    tblCompetitors.Open;
+    tblCompetitors.First;
+    tblAtempts.Open;
+    tblAtempts.First;
+  end;
+
+  // TextFile
+
+  Assignfile(Information, 'UsersInfo.txt');
+
+  if FileExists('UsersInfo.txt') = False then
+  begin
+    showmessage('The UserInformation textfile does not exist');
+    application.Terminate;
+  end;
+
+  reset(Information);
+  iNumOfEl := 0;
+
+  while not Eof(Information) and (iNumOfEl <= 100) do
+  begin
+    readln(Information, sLyn);
+    inc(iNumOfEl);
+    ipos := pos('~', sLyn);
+    arrUsernames[iNumOfEl] := copy(sLyn, 1, ipos - 1);
+    delete(sLyn, 1, ipos);
+    arrPasswords[iNumOfEl] := sLyn;
+  end;
+  closefile(Information);
+end;
+
+procedure TfrmClashJE.rgpAttemptsSortClick(Sender: TObject);
+begin
+  with dmClashJE do
+  begin
+    case rgpAttemptsSort.ItemIndex of
+      0:
+        begin
+          tblAtempts.Sort := 'Gamer_ID ASC, Total_Kills DESC';
+        end;
+      1:
+        begin
+          tblAtempts.Sort := 'Total_Games DESC, Total_Kills DESC';
+        end;
+      2:
+        begin
+          tblAtempts.Sort := 'Games_won DESC, Total_Kills DESC';
+        end;
+      3:
+        begin
+          tblAtempts.Sort := 'Total_Kills DESC, Games_Won DESC';
+        end;
+
+    end;
+  end;
+end;
+
+procedure TfrmClashJE.rgpSortClick(Sender: TObject);
+begin
+  with dmClashJE do
+  begin
+    case rgpSort.ItemIndex of
+      0:
+        begin
+          tblCompetitors.Sort := 'Username ASC';
+        end;
+      1:
+        begin
+          tblCompetitors.Sort := 'Gender ASC, Username ASC';
+        end;
+      2:
+        begin
+          tblCompetitors.Sort := 'Level ASC, Username ASC';
+        end;
+      3:
+        begin
+          tblCompetitors.Sort := 'SoloQRank ASC, Username ASC';
+        end;
+
+    end;
+  end;
+end;
+
+// HELP
+
+procedure TfrmClashJE.btnHelpClick(Sender: TObject);
+begin
+  btnCloseHelp := TButton.Create(frmClashJE);
+  redHelp := TRichEdit.Create(frmClashJE);
+  with btnCloseHelp do
+  begin
+    parent := tbsWelcome;
+    height := 45;
+    left := 344;
+    Top := 500;
+    width := 80;
+    Caption := 'CLOSE';
+    Font.Size := 15;
+    Font.Name := 'Poor Richard';
+    Font.Style := [fsbold];
+    OnClick := CloseHelp;
+  end;
+
+  with redHelp do
+  begin
+    parent := tbsWelcome;
+    height := 359;
+    width := 698;
+    Top := 136;
+    left := 40;
+    Font.Size := 22;
+    Font.Name := 'Poor Richard';
+    ScrollBars := TScrollStyle.ssVertical;
+  end;
+
+  redHelp.Lines.Clear;
+  redHelp.Lines.Add('_____________________________________________' + sLineBreak
+    + sLineBreak + '    WELCOME TO THE ANNUAL CLASH TOURNAMENT !' + sLineBreak +
+    '_____________________________________________' + sLineBreak + sLineBreak +
+    'Clash is a league of Legends Tournament that is hosted ' +
+    'globally each year. ' +
+    'Summoners have been competeting for the Clash title since 2012. ' +
+    'Join in and battle against other summoners in a series of matches.' +
+    sLineBreak + sLineBreak +
+    'Anyone with a rank and a minimum level of 20 can compete in this ' +
+    'tournament. You can keep your blue essence, it''s free of charge!' +
+    'The only requirement is to create a Clash username ' +
+    'to prevent redundant entries.' + sLineBreak + sLineBreak +
+    'Thank you for participating in Clash.' + sLineBreak +
+    'Goodluck summoner!!! ');
+end;
+
+procedure TfrmClashJE.btnResultsClick(Sender: TObject);
+var
+  ssGamer_ID, ssUsername, ssGender, ssSoloQRank: string;
+  iTel, iiKills, iiGamesWon, iiLevel: integer;
+begin
+  tbsAttempts.Enabled := False;
+  pcPages.Pages[3].TabVisible := False;
+  tbsResults.Enabled := True;
+  pcPages.Pages[4].TabVisible := True;
+  iTel := 0;
+  redResults.ScrollBars := TScrollStyle.ssVertical;
+
+  with dmClashJE do
+  begin
+    tblAtempts.Open;
+    redResults.Lines.Add
+      ('_________________________________________________________________' +
+      sLineBreak + sLineBreak +
+      '                                                                                THE RESULTS ARE READY !'
+      + sLineBreak +
+      '_________________________________________________________________' +
+      sLineBreak + sLineBreak +
+      'You can perform better than other competitors in various ways: ' +
+      'A higher creep score, more assists as a support, fewer deaths as a laner,'
+      + ' more kills than the enemy team, overall more victories and more...' +
+      sLineBreak +
+      'This tournament is made for those who want a chance to compete but are '
+      + 'not yet at an e-sports level. Thus we have decided to rather focus on '
+      + 'the total kills and games won by each player.' +
+      ' These statistics are easy to ' +
+      'understand and give a good representation of your skill level at ' +
+      'the early stages. ' +
+      'The winners of this tournament are those with the highest ' +
+      'number of games won and' + ' the most total kills.' + sLineBreak +
+      sLineBreak +
+      '_________________________________________________________________' +
+      sLineBreak);
+
+    tblAtempts.Sort := 'Total_Kills DESC';
+    tblAtempts.First;
+    redResults.Lines.Add('Total kills winners:' + sLineBreak);
+
+    for iTel := 1 to 3 do
+    begin
+      ssGamer_ID := tblAtempts['Gamer_ID'];
+      tblCompetitors.Locate('Gamer_ID', ssGamer_ID, []);
+      ssUsername := tblCompetitors['Username'];
+      ssGender := tblCompetitors['Gender'];
+      iiLevel := tblCompetitors['Level'];
+      ssSoloQRank := tblCompetitors['SoloQRank'];
+      iiKills := tblAtempts['Total_Kills'];
+
+      redResults.Lines.Add(inttostr(iTel) + ' place:  ' + ssGamer_ID + ' ' +
+        'Total kills = ' + inttostr(tblAtempts['Total_Kills']) + sLineBreak +
+        ssUsername + ' ' + ssGender + ' ' + inttostr(iiLevel) + ' ' +
+        ssSoloQRank + sLineBreak);
+
+      tblAtempts.Next;
+    end;
+
+    redResults.Lines.Add(sLineBreak);
+
+    tblAtempts.Sort := 'Games_Won DESC';
+    tblAtempts.First;
+    redResults.Lines.Add('Total games won winners:' + sLineBreak);
+
+    for iTel := 1 to 3 do
+    begin
+      ssGamer_ID := tblAtempts['Gamer_ID'];
+      tblCompetitors.Locate('Gamer_ID', ssGamer_ID, []);
+      ssUsername := tblCompetitors['Username'];
+      ssGender := tblCompetitors['Gender'];
+      iiLevel := tblCompetitors['Level'];
+      ssSoloQRank := tblCompetitors['SoloQRank'];
+      iiGamesWon := tblAtempts['Games_Won'];
+
+      redResults.Lines.Add(inttostr(iTel) + ' place:  ' + ssGamer_ID + ' ' +
+        'Total games won= ' + inttostr(tblAtempts['Games_Won']) + sLineBreak +
+        ssUsername + ' ' + ssGender + ' ' + inttostr(iiLevel) + ' ' +
+        ssSoloQRank + sLineBreak);
+
+      tblAtempts.Next;
+    end;
+
+    redResults.Lines.Add
+      ('                                                                                CONGRATULATIONS SUMMONERS!!'
+      + '_________________________________________________________________');
+  end;
+
+end;
+
+procedure TfrmClashJE.CloseHelp(Sender: TObject);
+begin
+  btnCloseHelp.Destroy;
+  redHelp.Destroy;
+end;
+
+procedure TfrmClashJE.cmbAttemptsSearchChange(Sender: TObject);
+var
+  ssGamer_ID: string;
+  bGevind: boolean;
+begin
+  with dmClashJE do
+  begin
+    case cmbAttemptsSearch.ItemIndex of
+      - 1:
+        begin
+          showmessage('Please select a search method');
+          cmbSearchMethod.SetFocus;
+        end;
+      0:
+        begin
+          ssGamer_ID := InputBox('Gamer_ID',
+            'Please enter the Gamer_ID of the person you are searching for',
+            '');
+
+          tblAtempts.Open;
+          tblAtempts.First;
+          bGevind := False;
+
+          while not tblAtempts.Eof and (bGevind = False) do
+          begin
+            if tblAtempts['Gamer_ID'] = ssGamer_ID then
+            begin
+              bGevind := True;
+
+              showmessage('User ' + ssGamer_ID + ' is in the data base!' +
+                sLineBreak + 'Total Games: ' +
+                inttostr(tblAtempts['Total_Games']) + sLineBreak + 'Games Won: '
+                + inttostr(tblAtempts['Games_Won']) + sLineBreak +
+                'Total Kills: ' + inttostr(tblAtempts['Total_kills']));
+            end;
+            tblAtempts.Next;
+          end;
+          if bGevind = False then
+          begin
+            showmessage('The user: ' + ssGamer_ID + ' was not found');
+          end;
+        end;
+    end;
+  end;
+end;
+
+procedure TfrmClashJE.cmbSearchMethodChange(Sender: TObject);
+var
+  ssUsername, ssGamer_ID: string;
+  bGevind: boolean;
+begin
+  with dmClashJE do
+  begin
+    case cmbSearchMethod.ItemIndex of
+      - 1:
+        begin
+          showmessage('Please select a search method');
+          cmbSearchMethod.SetFocus;
+        end;
+      0:
+        begin
+          ssUsername := InputBox('Username',
+            'Please enter the username you are searching for', '');
+
+          tblCompetitors.Open;
+          tblCompetitors.First;
+          bGevind := False;
+
+          while not tblCompetitors.Eof and (bGevind = False) do
+          begin
+            if (tblCompetitors['Username'] = ssUsername) then
+            begin
+              bGevind := True;
+
+              showmessage('User ' + ssUsername + ' is in the data base!' +
+                sLineBreak + 'Gamer_ID: ' + tblCompetitors['Gamer_ID'] +
+                sLineBreak + 'Gender: ' + tblCompetitors['Gender'] + sLineBreak
+                + 'Level: ' + inttostr(tblCompetitors['Level']) + sLineBreak +
+                'SoloQRank: ' + tblCompetitors['SoloQRank']);
+            end;
+            tblCompetitors.Next;
+          end;
+
+          if bGevind = False then
+          begin
+            showmessage('The user: ' + ssUsername + ' was not found');
+          end;
+
+        end;
+
+      1:
+        begin
+          ssGamer_ID := InputBox('Gamer_ID',
+            'Please enter the Gmaer_ID of the person you are searching for',
+            '');
+
+          tblCompetitors.Open;
+          tblCompetitors.First;
+          bGevind := False;
+
+          while not tblCompetitors.Eof and (bGevind = False) do
+          begin
+            if tblCompetitors['Gamer_ID'] = ssGamer_ID then
+            begin
+              bGevind := True;
+
+              showmessage('User ' + ssGamer_ID + ' is in the data base!' +
+                sLineBreak + 'Username: ' + tblCompetitors['username'] +
+                sLineBreak + 'Gender: ' + tblCompetitors['Gender'] + sLineBreak
+                + 'Level: ' + inttostr(tblCompetitors['Level']) + sLineBreak +
+                'SoloQRank: ' + sLineBreak + tblCompetitors['SoloQRank']);
+            end;
+            tblCompetitors.Next;
+          end;
+
+          if bGevind = False then
+          begin
+            showmessage('The user: ' + ssGamer_ID + ' was not found');
+          end;
+        end;
+    end;
+  end;
+end;
+
+// CREATE ACCOUNT
+procedure TfrmClashJE.btnSignInClick(Sender: TObject);
+
+var
+  iTel: integer;
+  bGevind, bPasswordIncorrect: boolean;
+  sUsername, sPassword: string;
+begin
+  iTel := 0;
+  bGevind := False;
+  bPasswordIncorrect := False;
+  sUsername := edtSignInUsername.Text;
+  sPassword := edtSignInPassword.Text;
+
+  while (iTel <= iNumOfEl) and (bGevind = False) and
+    (bPasswordIncorrect = False) do
+  begin
+    inc(iTel);
+    if (sUsername = arrUsernames[iTel]) and (sPassword = arrPasswords[iTel])
+    then
+    begin
+      bGevind := True;
+    end
+    else if (sUsername = arrUsernames[iTel]) and
+      (sPassword <> arrPasswords[iTel]) then
+    begin
+      bPasswordIncorrect := True;
+    end;
+
+  end;
+
+  if bPasswordIncorrect = True then
+  begin
+    showmessage('Sign in failed: Your password is incorrect.');
+    edtSignInPassword.Clear;
+    edtSignInPassword.SetFocus;
+    exit;
+  end;
+
+  if bGevind = True then
+  begin
+    showmessage('Sign in successful!');
+    tbsSignIn.Enabled := False;
+    pcPages.Pages[1].TabVisible := False;
+    tbsCompetitors.Enabled := True;
+    pcPages.Pages[2].TabVisible := True;
+    btnUpdate.Enabled := False;
+    btnDelete.Enabled := False;
+    edtGamer_ID.Enabled := False;
+  end
+  else
+  begin
+    showmessage('Sign in failed: You must register prior to sign in.');
+    tbsWelcome.Enabled := True;
+    pcPages.Pages[0].TabVisible := True;
+    tbsSignIn.Enabled := False;
+    pcPages.Pages[1].TabVisible := False;
+    tbsCompetitors.Enabled := False;
+    pcPages.Pages[2].TabVisible := False;
+    tbsAttempts.Enabled := False;
+    pcPages.Pages[3].TabVisible := False;
+  end;
+end;
+
+procedure TfrmClashJE.btnSkipClick(Sender: TObject);
+var
+  sUsername, sPassword, sLyn: string;
+  iTel, iPasswordCap, iPasswordSymbol, iUsername: integer;
+  bCapital, bGevind: boolean;
+  Information: textfile;
+
+begin
+  // init
+  iTel := 0;
+  iUsername := 0;
+  bCapital := False;
+
+  sUsername := edtSignUpUsername.Text;
+  sPassword := edtSignUpPassword.Text;
+
+  // Username validation
+
+  if length(sUsername) > 20 then
+  begin
+    showmessage('Your username may not exceed 20 characters.');
+    edtSignUpUsername.SetFocus;
+    edtSignUpUsername.Clear;
+    exit;
+  end;
+
+  if sUsername = '' then
+  begin
+    showmessage('Please enter a username.');
+    edtSignUpUsername.SetFocus;
+    edtSignUpUsername.Clear;
+    exit;
+  end;
+
+  for iTel := 1 to length(sUsername) do
+  begin
+    if sUsername[iTel] in ['A' .. 'Z', 'a' .. 'z'] then
+    begin
+      inc(iUsername);
+    end;
+  end;
+
+  if iUsername < 6 then
+  begin
+    showmessage('Your username must consist of atleast 6 alphabet characters.');
+    edtSignUpUsername.SetFocus;
+    edtSignUpUsername.Clear;
+    exit;
+  end;
+
+  // Password validation
+
+  if length(sPassword) > 20 then
+  begin
+    showmessage('Your password may not exceed 20 characters');
+    edtSignUpPassword.SetFocus;
+    exit;
+  end;
+
+  if sPassword = '' then
+  begin
+    showmessage('Please enter a password');
+    edtSignUpPassword.SetFocus;
+    exit;
+  end;
+
+  for iTel := 1 to length(sPassword) do
+  begin
+    if sPassword[iTel] in ['A' .. 'Z'] then
+    begin
+      bCapital := True;
+    end;
+  end;
+
+  if bCapital = False then
+  begin
+    showmessage('Your password must contain atleast one capital letter');
+    edtSignUpPassword.SetFocus;
+    edtSignUpPassword.Clear;
+    exit;
+  end;
+
+  iPasswordCap := 0;
+  for iTel := 1 to length(sPassword) do
+  begin
+    if sPassword[iTel] in ['A' .. 'Z'] then
+    begin
+      inc(iPasswordCap);
+    end;
+  end;
+  // ShowMessage(IntToStr(iPassword));
+  for iTel := 1 to length(sPassword) do
+  begin
+    if sPassword[iTel] in ['a' .. 'z'] then
+    begin
+      inc(iPasswordCap);
+    end;
+  end;
+  // ShowMessage(IntToStr(iPassword));
+  if (iPasswordCap < 6) then
+  begin
+    showmessage('Your password must contain atleast 6 alphabet letters');
+    edtSignUpPassword.SetFocus;
+    edtSignUpPassword.Clear;
+    exit;
+  end;
+
+  iPasswordSymbol := 0;
+  for iTel := 1 to length(sPassword) do
+  begin
+    if sPassword[iTel] in ['*', '^', '_', '!', '%', '@', '#', '$', '&'] then
+    begin
+      inc(iPasswordSymbol);
+    end;
+  end;
+
+  if (iPasswordSymbol = 0) then
+  begin
+    showmessage
+      ('Your password must contain atleast one special character: !,@,#,$,%,^,&,*');
+    edtSignUpPassword.SetFocus;
+    edtSignUpPassword.Clear;
+    exit;
+  end;
+
+  // TextFile
+
+  iTel := 0;
+  bGevind := False;
+
+  while (iTel <= iNumOfEl) and (bGevind = False) do
+  begin
+    inc(iTel);
+    if (sUsername = arrUsernames[iTel]) and (sPassword = arrPasswords[iTel])
+    then
+    begin
+      bGevind := True;
+    end;
+  end;
+  if bGevind = True then
+  begin
+    showmessage('You are already registered');
+    tbsWelcome.Enabled := False;
+    pcPages.Pages[0].TabVisible := False;
+    tbsSignIn.Enabled := True;
+    pcPages.Pages[1].TabVisible := True;
+  end
+  else
+  begin
+    inc(iNumOfEl);
+    arrUsernames[iNumOfEl] := sUsername;
+    arrPasswords[iNumOfEl] := sPassword;
+
+    sLyn := sUsername + '~' + sPassword;
+    Assignfile(Information, 'UsersInfo.txt');
+
+    if FileExists('usersInfo.txt') = False then
+    begin
+      Rewrite(Information);
+    end
+    else
+    begin
+      Append(Information);
+    end;
+
+    Writeln(Information, sLyn);
+    closefile(Information);
+
+    showmessage('You now have an account! Please Sign In');
+    tbsWelcome.Enabled := False;
+    pcPages.Pages[0].TabVisible := False;
+    tbsSignIn.Enabled := True;
+    pcPages.Pages[1].TabVisible := True;
+
+  end;
+
+end;
+
+procedure TfrmClashJE.btnSkipToSignInClick(Sender: TObject);
+begin
+  tbsWelcome.Enabled := False;
+  pcPages.Pages[0].TabVisible := False;
+  tbsSignIn.Enabled := True;
+  pcPages.Pages[1].TabVisible := True;
+end;
+
+procedure TfrmClashJE.btnUpdateClick(Sender: TObject);
+var
+  ssUsername, ssGender, ssSoloQRank, ssGamer_ID: string;
+  iiLevel, iTel, iiUsernameTel: integer;
+  bGevind, bUsernameGevind: boolean;
+begin
+  ssUsername := edtUsername.Text;
+  ssGender := cmbGender.Text;
+  ssSoloQRank := cmbSoloQRank.Text;
+  iiLevel := sedLevel.Value;
+  iTel := 0;
+  iiUsernameTel := 0;
+  bGevind := False;
+  bUsernameGevind := False;
+
+  if ssUsername = '' then
+  begin
+    showmessage('Please enter a Username');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  if length(ssUsername) < 3 then
+  begin
+    showmessage('Your username may not be shorter than 3 characters');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  if length(ssUsername) > 30 then
+  begin
+    showmessage('Your username may not exceed 30 characters');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  iiUsernameTel := 0;
+  for iTel := 1 to length(ssUsername) do
+  begin
+    if (ssUsername[iTel] in ['A' .. 'Z']) then
+    begin
+      inc(iiUsernameTel);
+    end;
+  end;
+  for iTel := 1 to length(ssUsername) do
+  begin
+    if (ssUsername[iTel] in ['a' .. 'z']) then
+    begin
+      inc(iiUsernameTel);
+    end;
+  end;
+
+  if iiUsernameTel < 3 then
+  begin
+    showmessage
+      ('Please enter a username consisting of atleast 3 alphabet letters');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  if cmbGender.ItemIndex = -1 then
+  begin
+    showmessage('Please select a gender.');
+    cmbGender.ItemIndex := -1;
+    cmbGender.SetFocus;
+    exit;
+  end;
+
+  if ssGender = '' then
+  begin
+    showmessage('Please select a gender from the combo box.');
+    cmbGender.ItemIndex := -1;
+    cmbGender.SetFocus;
+    exit;
+  end;
+
+  if not((cmbGender.ItemIndex = 1) or (cmbGender.ItemIndex = 0)) then
+  begin
+    showmessage('Please select a gender from the combo box.');
+    cmbGender.SetFocus;
+    exit;
+  end;
+
+  if not((ssSoloQRank = 'Iron') or (ssSoloQRank = 'Bronze') or
+    (ssSoloQRank = 'Silver') or (ssSoloQRank = 'Gold') or
+    (ssSoloQRank = 'Platinum') or (ssSoloQRank = 'Diamond') or
+    (ssSoloQRank = 'Master') or (ssSoloQRank = 'Grandmaster')) then
+  begin
+    showmessage('Please select a SoloQRank.');
+    cmbSoloQRank.SetFocus;
+    exit;
+  end;
+
+  if (sedLevel.Value < 20) or (sedLevel.Value > 999) then
+  begin
+    showmessage('Please select a level from 20 to 999');
+    sedLevel.Value := 20;
+    sedLevel.SetFocus;
+    exit;
+  end;
+
+  with dmClashJE do
+  begin
+    ssGamer_ID := tblCompetitors['Gamer_ID'];
+    tblCompetitors.Open;
+    tblCompetitors.Locate('Gamer_ID', edtGamer_ID.Text, []);
+    tblCompetitors.Edit;
+    tblCompetitors['Username'] := ssUsername;
+    tblCompetitors['Gender'] := ssGender;
+    tblCompetitors['Level'] := iiLevel;
+    tblCompetitors['SoloQRank'] := ssSoloQRank;
+    tblCompetitors.Post;
+    showmessage('User ' + ssGamer_ID + ' ' + ssUsername +
+      ' has been successfully updated');
+  end;
+
+end;
+
+procedure TfrmClashJE.btnBackCompetitorsClick(Sender: TObject);
+begin
+  tbsCompetitors.Enabled := True;
+  pcPages.Pages[2].TabVisible := True;
+  tbsAttempts.Enabled := False;
+  pcPages.Pages[3].TabVisible := False;
+end;
+
+procedure TfrmClashJE.btnAttemptsUpdateClick(Sender: TObject);
+var
+  ssGamer_ID: string;
+  iiLevel, iTel, iiUsernameTel: integer;
+  iTotalGames, iGamesWon, iTotalKills: integer;
+  bGevind: boolean;
+begin
+  ssGamer_ID := '';
+  iTotalGames := sedTotalGames.Value;
+  iTotalKills := sedTotalKills.Value;
+  iGamesWon := sedGamesWon.Value;
+  iTel := 0;
+  iiUsernameTel := 0;
+  bGevind := False;
+
+  edtAttemptsGamer_ID.Enabled := False;
+
+  if iTotalGames > 99 then
+  begin
+    showmessage('You may only enter up to 99 games');
+    sedTotalGames.Value := 99;
+    sedTotalGames.SetFocus;
+    exit;
+  end;
+
+  if iGamesWon > 99 then
+  begin
+    showmessage('You may only enter up to 99 games');
+    sedGamesWon.Value := 99;
+    sedGamesWon.SetFocus;
+    exit;
+  end;
+
+  if iTotalKills > 999 then
+  begin
+    showmessage('You may only enter up to 99 games');
+    sedTotalKills.Value := 999;
+    sedTotalKills.SetFocus;
+    exit;
+  end;
+
+  if iGamesWon > iTotalGames then
+  begin
+    showmessage
+      ('Your total games won, exceeds your games played. Please enter the correct results.');
+    sedGamesWon.Value := iTotalGames;
+    sedGamesWon.SetFocus;
+    exit;
+  end;
+
+  with dmClashJE do
+  begin
+    ssGamer_ID := tblAtempts['Gamer_ID'];
+    tblAtempts.Open;
+    tblAtempts.Locate('Gamer_ID', edtAttemptsGamer_ID.Text, []);
+    tblAtempts.Edit;
+    tblAtempts['Total_Games'] := iTotalGames;
+    tblAtempts['Games_Won'] := iGamesWon;
+    tblAtempts['Total_Kills'] := iTotalKills;
+    tblAtempts.Post;
+    showmessage('User ' + ssGamer_ID + ' ' + ' has been successfully updated');
+  end;
+
+end;
+
+procedure TfrmClashJE.btnAttemtpsClick(Sender: TObject);
+begin
+  tbsCompetitors.Enabled := False;
+  pcPages.Pages[2].TabVisible := False;
+  tbsAttempts.Enabled := True;
+  pcPages.Pages[3].TabVisible := True;
+end;
+
+// SIGN IN
+
+procedure TfrmClashJE.tbsSignInShow(Sender: TObject);
+begin
+  imgSignIn.Picture.LoadFromFile('imgWelcome.jpg');
+  imgSignIn.Stretch := True;
+  imgSignIn.Center := True;
+end;
+
+procedure TfrmClashJE.btnBackSignInClick(Sender: TObject);
+begin
+  tbsSignIn.Enabled := True;
+  pcPages.Pages[1].TabVisible := True;
+  tbsCompetitors.Enabled := False;
+  pcPages.Pages[2].TabVisible := False;
+end;
+
+procedure TfrmClashJE.btnBackWelcomeClick(Sender: TObject);
+begin
+  tbsWelcome.Enabled := True;
+  pcPages.Pages[0].TabVisible := True;
+  tbsSignIn.Enabled := False;
+  pcPages.Pages[1].TabVisible := False;
+end;
+
+// COMPETITORS
+
+procedure TfrmClashJE.dbgAtemptsCellClick(Column: TColumn);
+begin
+  with dmClashJE do
+  begin
+    edtAttemptsGamer_ID.Text := tblAtempts['Gamer_ID'];
+    sedGamesWon.Value := tblAtempts['Games_Won'];
+    sedTotalGames.Value := tblAtempts['Total_Games'];
+    sedTotalKills.Value := tblAtempts['Total_Kills'];
+  end;
+end;
+
+procedure TfrmClashJE.dbgCompetitorsCellClick(Column: TColumn);
+begin
+  with dmClashJE do
+  begin
+    sGamer_Id := tblCompetitors['Gamer_ID'];
+    sUsername := tblCompetitors['Username'];
+    sGender := tblCompetitors['Gender'];
+    iLevel := tblCompetitors['Level'];
+    sSoloQRank := tblCompetitors['SoloQRank'];
+
+    edtGamer_ID.Text := sGamer_Id;
+    edtUsername.Text := sUsername;
+    cmbGender.Text := sGender;
+    cmbSoloQRank.Text := sSoloQRank;
+    sedLevel.Value := iLevel;
+  end;
+  btnUpdate.Enabled := True;
+  btnDelete.Enabled := True;
+  edtGamer_ID.Enabled := False;
+end;
+
+procedure TfrmClashJE.btnAddClick(Sender: TObject);
+var
+  ssGamer_ID, ssUsername, ssGender, ssSoloQRank: string;
+  bGevind, bUserGevind: boolean;
+  iTel, iiLevel, iiUsernameTel: integer;
+begin
+  ssUsername := edtUsername.Text;
+  ssGender := cmbGender.Text;
+  ssSoloQRank := cmbSoloQRank.Text;
+  iiLevel := sedLevel.Value;
+  iTel := 0;
+  iiUsernameTel := 0;
+  bGevind := False;
+  bUserGevind := False;
+
+  if ssUsername = '' then
+  begin
+    showmessage('Please enter a Username');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  if length(ssUsername) < 3 then
+  begin
+    showmessage('Your username may not be shorter than 3 characters');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  if length(ssUsername) > 30 then
+  begin
+    showmessage('Your username may not exceed 30 characters');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  iiUsernameTel := 0;
+  for iTel := 1 to length(ssUsername) do
+  begin
+    if (ssUsername[iTel] in ['A' .. 'Z']) then
+    begin
+      inc(iiUsernameTel);
+    end;
+  end;
+  for iTel := 1 to length(ssUsername) do
+  begin
+    if (ssUsername[iTel] in ['a' .. 'z']) then
+    begin
+      inc(iiUsernameTel);
+    end;
+  end;
+
+  if iiUsernameTel < 3 then
+  begin
+    showmessage
+      ('Please enter a username consisting of atleast 3 alphabet letters');
+    edtUsername.SetFocus;
+    exit;
+  end;
+
+  if cmbGender.ItemIndex = -1 then
+  begin
+    showmessage('Please select a gender.');
+    cmbGender.ItemIndex := -1;
+    cmbGender.SetFocus;
+    exit;
+  end;
+
+  if ssGender = '' then
+  begin
+    showmessage('Please select a gender from the combo box.');
+    cmbGender.ItemIndex := -1;
+    cmbGender.SetFocus;
+    exit;
+  end;
+
+  if not((cmbGender.ItemIndex = 1) or (cmbGender.ItemIndex = 0)) then
+  begin
+    showmessage('Please select a gender from the combo box.');
+    cmbGender.SetFocus;
+    exit;
+  end;
+
+  if not((ssSoloQRank = 'Iron') or (ssSoloQRank = 'Bronze') or
+    (ssSoloQRank = 'Silver') or (ssSoloQRank = 'Gold') or
+    (ssSoloQRank = 'Platinum') or (ssSoloQRank = 'Diamond') or
+    (ssSoloQRank = 'Master') or (ssSoloQRank = 'Grandmaster')) then
+  begin
+    showmessage('Please select a SoloQRank.');
+    cmbSoloQRank.SetFocus;
+    exit;
+  end;
+
+  if (sedLevel.Value < 20) or (sedLevel.Value > 999) then
+  begin
+    showmessage('Please select a level from 20 to 999');
+    sedLevel.Value := 20;
+    sedLevel.SetFocus;
+    exit;
+  end;
+
+  ssGamer_ID := Uppercase(copy(ssUsername, 1, 3)) + copy(ssGender, 1, 1) +
+    copy(ssSoloQRank, 1, 1) + inttostr(iiLevel);
+  edtGamer_ID.Text := ssGamer_ID;
+
+  with dmClashJE do
+  begin
+    tblCompetitors.First;
+    while not tblCompetitors.Eof and (bGevind = False) do
+    begin
+      if tblCompetitors['Gamer_ID'] = ssGamer_ID then
+      begin
+        bGevind := True;
+      end;
+      tblCompetitors.Next;
+    end;
+    if bGevind = True then
+    begin
+      showmessage('This competitor is already in the system!');
+      exit;
+    end
+    else
+    begin
+      tblAtempts.Last;
+      tblAtempts.Insert;
+      tblAtempts['Gamer_ID'] := ssGamer_ID;
+      tblAtempts['Total_Games'] := 0;
+      tblAtempts['Games_Won'] := 0;
+      tblAtempts['Total_Kills'] := 0;
+      tblAtempts.Post;
+
+      tblCompetitors.Last;
+      tblCompetitors.Insert;
+
+      tblCompetitors['Gamer_ID'] := ssGamer_ID;
+
+      tblCompetitors['Username'] := ssUsername;
+      tblCompetitors['Gender'] := ssGender;
+      tblCompetitors['Level'] := iiLevel;
+      tblCompetitors['SoloQRank'] := ssSoloQRank;
+      tblCompetitors.Post;
+
+      showmessage('Competitor  ' + ssGamer_ID + '( ' + ssUsername + ' )' +
+        ' successfully added!');
+    end;
+  end;
+  edtGamer_ID.Clear;
+  edtUsername.Clear;
+  cmbGender.ItemIndex := -1;
+  cmbSoloQRank.ItemIndex := -1;
+  sedLevel.Value := 20;
+end;
+
+procedure TfrmClashJE.btnDeleteClick(Sender: TObject);
+Var
+  ssGamer_ID: string;
+  bGevind: boolean;
+begin
+  ssGamer_ID := InputBox('Gamer_ID',
+    'Enter the Gamer_ID of the competitor you want to delete', '');
+
+  With dmClashJE do
+  begin
+    tblCompetitors.Open;
+    tblCompetitors.First;
+
+    tblCompetitors.Sort := 'Gamer_ID ASC';
+    tblCompetitors.Sort := 'Gamer_ID ASC';
+
+    while not tblCompetitors.Eof and (bGevind = False) do
+    begin
+      if tblCompetitors['Gamer_ID'] = ssGamer_ID then
+      begin
+        bGevind := True;
+      end;
+      tblCompetitors.Next;
+    end;
+
+    if bGevind = False then
+    begin
+      showmessage('Competitor not found.');
+      exit;
+    end;
+
+    if (messagedlg('Do you still want to delete ' + ssGamer_ID +
+      ' and all the related information', mtconfirmation, [mbYes, mbNO], 0)
+      = mrYes) and (bGevind = True) then
+    begin
+      tblCompetitors.Locate('Gamer_ID', ssGamer_ID, []);
+      tblCompetitors.delete;
+      tblAtempts.Locate(' Gamer_ID', ssGamer_ID, []);
+      tblAtempts.delete;
+      showmessage('Competitor ' + ssGamer_ID +
+        ' has been successfully removed.')
+      // end;
+    end
+    else
+    begin
+      showmessage('No record removed.')
+    end;
+  end;
+end;
+
+procedure TfrmClashJE.btnCloseProgramClick(Sender: TObject);
+begin
+  application.Terminate;
+end;
+
+end.
